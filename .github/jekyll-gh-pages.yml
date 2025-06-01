@@ -1,0 +1,93 @@
+# .github/workflows/jekyll-gh-pages.yml
+
+name: Build and Deploy Jekyll Site to GitHub Pages
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events but only for the main branch
+  push:
+    branches:
+      - main  # Or master, or your default branch name
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job
+  build:
+    name: Build Jekyll Site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby and Jekyll
+        uses: ruby/setup-ruby@v1
+        with:
+          # Specify the Ruby version your Jekyll site uses.
+          # Check Jekyll documentation for compatible Ruby versions.
+          ruby-version: '3.1' # Example: '3.0', '3.1', '3.2'
+          # This caches gems and runs 'bundle install' automatically.
+          bundler-cache: true
+          # cache-version: 1 # Optional: Increment to invalidate cache
+          working-directory: ./blog # Specify the working directory for bundle install
+
+      - name: Setup GitHub Pages
+        id: pages # Assign an id to refer to outputs of this step
+        uses: actions/configure-pages@v5
+        # This action configures the base URL for GitHub Pages.
+        # For a user/organization site like accent.github.io, the base_path will be empty.
+        # For a project site (e.g., username.github.io/project-name), it would be /project-name.
+
+      - name: Build with Jekyll
+        # Uses the output of the 'Setup GitHub Pages' step to set the base URL.
+        # The --lsi option generates an index for related posts (optional).
+        # JEKYLL_ENV=production ensures production-specific settings are used (if any).
+        working-directory: ./blog # Specify the working directory for jekyll build
+        run: bundle exec jekyll build --lsi --baseurl "${{ steps.pages.outputs.base_path }}"
+        env:
+          JEKYLL_ENV: production
+
+      - name: Upload artifact for deployment
+        # This action uploads the built Jekyll site (from the blog/_site directory)
+        # as an artifact that the deployment job can use.
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Path to the directory Jekyll builds the site into.
+          path: './blog/_site'
+
+  # Deployment job
+  deploy:
+    name: Deploy to GitHub Pages
+    # Requires the 'build' job to complete successfully first.
+    needs: build
+    runs-on: ubuntu-latest
+
+    # Grant GITHUB_TOKEN the permissions required to deploy to GitHub Pages
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }} # Sets the deployment URL in the GitHub environment
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment # Assign an id to refer to outputs of this step
+        uses: actions/deploy-pages@v4
+        # This action takes the artifact uploaded by 'upload-pages-artifact'
+        # and deploys it to GitHub Pages.
+        # Ensure your repository's GitHub Pages settings are configured to "Deploy from Action".
