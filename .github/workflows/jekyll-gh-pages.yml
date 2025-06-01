@@ -38,7 +38,7 @@ jobs:
         with:
           # Specify the Ruby version your Jekyll site uses.
           # Check Jekyll documentation for compatible Ruby versions.
-          ruby-version: '3.1' # Example: '3.0', '3.1', '3.2'
+          ruby-version: '3.2' # Example: '3.0', '3.1', '3.2'
           # This caches gems and runs 'bundle install' automatically.
           bundler-cache: true
           # cache-version: 1 # Optional: Increment to invalidate cache
