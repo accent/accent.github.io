@@ -19,16 +19,19 @@ jobs:
           ruby-version: 3.1.2 # Adjust as needed
 
       - name: Install Dependencies
+        working-directory: blog
         run: |
           gem install bundler
           bundle install
       
       - name: Build Jekyll Site
+        working-directory: blog
         run: |
           bundle exec jekyll build
      
       - name: Deploy Site
         uses: peaceiris/actions-gh-pages@v3
+        working-directory: blog
         with:
           external_repository: accent/accent.github.io 
           deploy_key: ${{ secrets.DEPLOY_KEY }}
