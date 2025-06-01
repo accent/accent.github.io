@@ -31,9 +31,8 @@ jobs:
      
       - name: Deploy Site
         uses: peaceiris/actions-gh-pages@v3
-        working-directory: blog
         with:
           external_repository: accent/accent.github.io 
-          deploy_key: ${{ secrets.DEPLOY_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: main 
           publish_dir: ./ 
